@@ -1,4 +1,6 @@
+import json
 import pickle
+
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -6,7 +8,17 @@ import streamlit as st
 from state import State
 from time import time
 
+
+
 state = State()
+
+confidence = 0
+
+
+
+def write_value_to_file(value):
+    with open("gauge_value.json", "w") as f:
+        json.dump({"value": value}, f)
 
 model_dict = pickle.load(open('./model.p', 'rb'))
 model = model_dict['model']
@@ -22,17 +34,65 @@ hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3, max
 labels_dict = {0: 'M', 1: 'N', 2: 'P', 3: 'Q', 4: 'R'}
 detection_start_time = None
 last_detected_character = ""
-hold_time = 3  # seconds
+hold_time = 2  # seconds
 
-col1, col2 = st.columns([0.9, 0.1])
-videoStream = col1.empty()
-wordStream = col2.empty()
+st.set_page_config(page_title="My App",layout='wide')
+# videoStream = st.empty()
+# col2, col3, col4 = st.columns(3)
+#
+#
+#
+# with (col2):
+#     st.title("Predicted Letter")
+#     predictedLetterDisplay = st.empty()
+#     progress_bar = st.empty()
+#
+#
+#
+#
+#
+# with col3:
+#     st.title("Predicted Word")
+#     wordDisplay = st.empty()
+#
+# with col4:
+#     st.title("Confidence Score")
+#     st.markdown(
+#         '<iframe src="http://localhost:8001/gauge_graph.html" width="500" height="300"></iframe>',
+#         unsafe_allow_html=True
+#     )
 
-with col2:
-    st.title("Predicted Letter")
-    predictedLetterDisplay = st.empty()
-    wordDisplay = st.empty()
-    progress_bar = st.empty()
+# state.load_state()
+
+with st.container():
+    col1, col2 = st.columns([0.6, 0.4])
+    with col1:
+        videoStream = st.empty()
+        st.button("A", type="primary")
+        st.button("B", type="primary")
+        st.button("C", type="primary")
+
+
+    with col2:
+            # with st.container():
+        # st.title("Predicted Letter")
+        predictedLetterDisplay = st.empty()
+        progress_bar = st.empty()
+        # st.title("Predicted Word")
+        wordDisplay = st.empty()
+
+        st.title("Confidence Score")
+        st.markdown(
+            '<iframe src="http://localhost:8001/gauge_graph.html" width="500" height="300"></iframe>',
+            unsafe_allow_html=True
+        )
+
+
+
+
+
+
+
 
 while True:
     ret, frame = cap.read()
@@ -56,8 +116,12 @@ while True:
                 data_aux.append(landmark.y - min(y_))
 
         prediction = model.predict([np.asarray(data_aux)])
+        probabilities = model.predict_proba([np.asarray(data_aux)])
+        confidence = max(max(probabilities))
+
+
         predicted_character = labels_dict[int(prediction[0])]
-        predictedLetterDisplay.text(predicted_character)
+        predictedLetterDisplay.header("Predicted Letter: {letter}".format(letter=predicted_character))
         # Check if detected character is consistent
         if predicted_character == last_detected_character:
             if detection_start_time is None:
@@ -79,15 +143,22 @@ while True:
         progress_value = int((elapsed_time / hold_time) * 100)
         if elapsed_time < hold_time:
             progress_bar.progress(progress_value)
+            # circular_progress.value = progress_value
+            # streamviz.gauge(progress_value)
         else:
             progress_bar.progress(100)
+            # streamviz.gauge(100)
     else:
         progress_bar.empty()  # Clears the progress bar if conditions aren't met
-
+        # streamviz.gauge(0)
     # predictedLetterDisplay.text(state.get_predicted_letter())
-    wordDisplay.text(state.get_current_word())
+    wordDisplay.header("Predicted Word: {word}".format(word=state.get_current_word()))
+
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    videoStream.image(frame, channels="RGB")
+    frame = cv2.resize(frame, (768,432))
+    videoStream.image(frame, channels="RGB",use_column_width="auto")
+
+    write_value_to_file(confidence*100)
 
     cv2.waitKey(1)
 
