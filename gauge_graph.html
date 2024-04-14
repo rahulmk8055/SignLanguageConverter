@@ -9,14 +9,14 @@
 
         function drawChart() {
             var data = google.visualization.arrayToDataTable([
-                ['Label', 'Value'],
-                ['Value', 0]
+                ['Label', 'Score'],
+                ['Score', 0]
             ]);
 
             var options = {
                 width: 800, height: 240,
-                redFrom: 90, redTo: 100,
-                yellowFrom:75, yellowTo: 90,
+                redFrom: 0, redTo: 80,  // Red color for 0-80
+                greenFrom: 80, greenTo: 100,  // Green color for 80-100
                 minorTicks: 5,
                 backgroundColor: { fill:'transparent' },  // Making the gauge background transparent
                 greenColor: '#00ff00',  // Adjusting the gauge colors for better visibility
