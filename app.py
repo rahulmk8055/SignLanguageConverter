@@ -8,6 +8,7 @@ import streamlit as st
 from state import State
 from time import time
 from streamlit_pills import pills
+
 state = State()
 state.load_state()
 
@@ -35,8 +36,6 @@ detection_start_time = None
 last_detected_character = ""
 hold_time = 2  # seconds
 
-
-
 st.set_page_config(page_title="ASL", layout='wide')
 
 st.markdown("""
@@ -55,63 +54,25 @@ st.markdown('#')
 
 value = ""
 
+
 def clear_word():
     state.set_current_word("")
 
-with st.container():
 
+with st.container():
     col1, col2 = st.columns([0.6, 0.4], gap='large')
     with st.container(border=True):
         with col1:
             videoStream = st.empty()
             col3, col4 = st.columns([0.6, 0.4])
             with col3:
-                # buttons = [{"label": "A", "value": "A"},
-                #            {"label": "B", "value": "B"},
-                #            {"label": "C", "value": "C"},
-                #            {"label": "D", "value": "D"},
-                #            {"label": "E", "value": "E"},
-                #            {"label": "F", "value": "F"},
-                #            {"label": "G", "value": "G"}
-                #            ]
-                # value = st_btn_group(
-                #     buttons=buttons,
-                #     size="mini",
-                #     shape="pill",
-                #     merge_buttons=True,
-                #     gap_between_buttons=0
-                # )
-                # value = st.selectbox(
-                #     'Choose the letter you would like to know the ASL sign?',
-                #     ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'))
-                value = pills("Select Letter", ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'])
-                valueWrite = st.empty()
-                valueWrite.write(value)
+                value = pills("Select Letter For Sign Reference",
+                              ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+                               'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'])
         with col4:
             st.image("B.png", width=250)
-        # col3, col4, col5 = st.columns(3)
-        # with col3:
-        #     st.button("A")
-        #     st.button("B")
-        #     st.button("C")
-        #     st.button("D")
-        #     st.button("E")
-        # with col4:
-        #     st.button("F")
-        #     st.button("G")
-        #     st.button("H")
-        #     st.button("I")
-        #     st.button("J")
-        # with col5:
-        #     st.button("K")
-        #     st.button("L")
-        #     st.button("M")
-        #     st.button("N")
-        #     st.button("O")
 
     with col2:
-        # with st.container():
-        # st.title("Predicted Letter")
         predictedLetterDisplay = st.empty()
         predictedLetterDisplay.header("Predicted Letter: ")
 
@@ -128,8 +89,6 @@ with st.container():
             '<iframe src="http://localhost:8001/gauge_graph.html" width="800" height="240"></iframe>',
             unsafe_allow_html=True
         )
-
-
 
 while True:
     ret, frame = cap.read()
@@ -191,7 +150,7 @@ while True:
     wordDisplay.header("Predicted Word: :rainbow[{word}]".format(word=state.get_current_word()))
 
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    frame = cv2.resize(frame, (640,360))
+    frame = cv2.resize(frame, (640, 360))
     videoStream.image(frame, channels="RGB", use_column_width="auto")
 
     write_value_to_file(confidence * 100)
