@@ -60,7 +60,6 @@ class State:
         return self._predictedLetter
 
     def get_current_word(self):
-        self.load_state()
         return self._currentWord
 
     def get_confidence_score(self):
