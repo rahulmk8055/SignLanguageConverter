@@ -90,7 +90,7 @@ with st.container():
         st.divider()
         st.header("Confidence Score")
         st.markdown(
-            '<iframe src="http://localhost:8001/gauge_graph.html" width="800" height="240"></iframe>',
+            '<iframe src="http://prompt-major-trout.ngrok-free.app/gauge_graph.html" width="800" height="240"></iframe>',
             unsafe_allow_html=True
         )
 
