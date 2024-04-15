@@ -10,6 +10,8 @@ from mediapipe.python.solutions.drawing_utils import DrawingSpec
 from state import State
 from time import time
 from streamlit_pills import pills
+import imutils
+import requests
 
 state = State()
 state.load_state()
@@ -17,7 +19,7 @@ state.load_state()
 confidence = 0
 predicted_character = ""
 
-
+url = "http://10.0.0.207:8080/shot.jpg?rnd=679082"
 def write_value_to_file(value):
     with open("gauge_value.json", "w") as f:
         json.dump({"value": value}, f)
@@ -26,7 +28,8 @@ def write_value_to_file(value):
 model_dict = pickle.load(open('./model.p', 'rb'))
 model = model_dict['model']
 
-cap = cv2.VideoCapture(0)
+# cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture('rtsp://10.0.0.207:8080/h264.sdp')
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 
 mp_hands = mp.solutions.hands
@@ -95,9 +98,13 @@ with st.container():
         )
 
 while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
+
+    frame = requests.get(url)
+    frame = np.array(bytearray(frame.content), dtype=np.uint8)
+    frame = cv2.imdecode(frame, -1)
+    # ret, frame = cap.read()
+    # if not ret:
+    #     break
 
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = hands.process(frame_rgb)

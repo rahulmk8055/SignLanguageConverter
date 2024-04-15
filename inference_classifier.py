@@ -3,11 +3,13 @@ import pickle
 import cv2
 import mediapipe as mp
 import numpy as np
+import imutils
+import requests
 
 model_dict = pickle.load(open('./model.p', 'rb'))
 model = model_dict['model']
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture('rtsp://10.0.0.207:8080/h264.sdp')
 
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -21,7 +23,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 
 hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3, max_num_hands=1)
 
-labels_dict = {0: '0', 1: '1', 2: '2', 3: '3', 4: '4'}
+labels_dict = {0: 'A', 1: 'B', 2: 'C', 3: 'D'}
 while True:
 
     data_aux = []
@@ -66,7 +68,7 @@ while True:
 
         prediction = model.predict([np.asarray(data_aux)])
 
-        predicted_character = labels_dict[int(prediction[0])]
+        predicted_character = prediction[0]
 
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 0), 4)
         cv2.putText(frame, predicted_character, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 0, 0), 3,
