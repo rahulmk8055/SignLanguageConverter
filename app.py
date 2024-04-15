@@ -59,7 +59,10 @@ value = "clear"
 
 
 def clear_word():
-    state.set_current_word("")
+    state.clear_state()
+
+def backspace_word():
+    state.set_current_word( state.get_current_word()[:-1])
 
 
 with st.container():
@@ -86,6 +89,7 @@ with st.container():
         # st.title("Predicted Word")
         wordDisplay = st.empty()
         st.button("clear", on_click=clear_word)
+        st.button("backspace", on_click=backspace_word)
         # st.markdown('#')
         st.divider()
         st.header("Confidence Score")
@@ -142,6 +146,8 @@ while True:
             if detection_start_time is None:
                 detection_start_time = time()
             elif time() - detection_start_time >= hold_time and confidence > 0.8:
+                if predicted_character == "space":
+                    predicted_character = " "
                 state.append_to_current_word(predicted_character)
                 detection_start_time = None  # Reset the timer
         else:
@@ -157,6 +163,7 @@ while True:
     colour = "green"
     if confidence < 0.8:
         colour = "red"
+
     predictedLetterDisplay.header(
         "Predicted Letter: :{colour}[{letter}]".format(letter=predicted_character, colour=colour))
     if detection_start_time:
